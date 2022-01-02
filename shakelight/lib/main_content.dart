@@ -1,10 +1,10 @@
 // ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_collection_literals, prefer_const_literals_to_create_immutables, unrelated_type_equality_checks
 
 import 'package:flutter/material.dart';
-import 'package:flutter/services.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
 import 'get_x_switch_state.dart';
+import 'package:vibration/vibration.dart';
 // import 'package:shake/shake.dart';
 // import 'package:torch_light/torch_light.dart';
 
@@ -112,15 +112,20 @@ class HomeContent extends State<MainContent> {
 
 
 	// Check if app functionality is on or off.
-	void _checkSwitchState() {
+	Future<void> _checkSwitchState() async {
 		if(switchStateBool == true) {
 			if(firstSwitch == 1) {
-				HapticFeedback.vibrate();
+				if (await Vibration.hasVibrator() != null) {
+					Vibration.vibrate(duration: 100);
+				}
 			}
 			// detector.startListening();
 			// print("ON");
 		} else if(switchStateBool == false && firstSwitch == 1) {
-			HapticFeedback.vibrate();
+			if (await Vibration.hasVibrator() != null) {
+				Vibration.vibrate(duration: 100);
+			}
+
 			// detector.stopListening();
 			// print("OFF");
 		}
