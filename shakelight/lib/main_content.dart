@@ -6,7 +6,7 @@ import 'package:get/instance_manager.dart';
 import 'get_x_switch_state.dart';
 import 'package:vibration/vibration.dart';
 import 'package:shake/shake.dart';
-// import 'package:torch_light/torch_light.dart';
+import 'package:torch_light/torch_light.dart';
 
 class MainContent extends StatefulWidget {
 	@override
@@ -24,7 +24,15 @@ class HomeContent extends State<MainContent> {
 	void initState() {
 		super.initState();
 		detector = ShakeDetector.waitForStart(onPhoneShake: () {
-			_vibrate();
+			if(flashLightState == 1) {
+				flashLightState = 0;
+				_vibrate();
+				_disableTorch(context);
+			} else if(flashLightState == 0) {
+				flashLightState = 1;
+				_vibrate();
+				_enableTorch(context);
+			}
 		});
 	}
   
@@ -54,10 +62,16 @@ class HomeContent extends State<MainContent> {
 		// 	onPhoneShake: () {
 		// 		if(flashLightState == 1) {
 		// 			flashLightState = 0;
+		// 			_vibrate();
+		// 			_disableTorch(context);
 		// 		} else if(flashLightState == 0) {
 		// 			flashLightState = 1;
+		// 			_vibrate();
+		// 			_enableTorch(context);
 		// 		}
-		// 		_vibrate();
+				
+
+
 
 		// 		// _switchFlashLight(flashLightState);
 		// 		// print("shake");
@@ -142,14 +156,14 @@ class HomeContent extends State<MainContent> {
 		}
 	}
 
-	// Future<bool> _checkFlashLight() async {
-	// 	try {
-	// 		return await TorchLight.isTorchAvailable();
-	// 	} on Exception catch (_) {
-	// 	// Handle error
-	// 		return false;
-	// 	}
-	// }
+	Future<bool> _checkFlashLight() async {
+		try {
+			return await TorchLight.isTorchAvailable();
+		} on Exception catch (_) {
+		// Handle error
+			return false;
+		}
+	}
 
 	// Future<void> _switchFlashLight(_onOff) async {
 	// 	if(_checkFlashLight() == true) {
@@ -176,5 +190,21 @@ class HomeContent extends State<MainContent> {
 	// 		// print("not available");
 	// 	}
 	// }
+
+	Future<void> _enableTorch(BuildContext context) async {
+		try {
+			await TorchLight.enableTorch();
+		} on Exception catch (_) {
+
+		}
+	}
+
+	Future<void> _disableTorch(BuildContext context) async {
+		try {
+			await TorchLight.disableTorch();
+		} on Exception catch (_) {
+
+		}
+	}
 }
 
