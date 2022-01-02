@@ -5,7 +5,7 @@ import 'package:get/get_state_manager/get_state_manager.dart';
 import 'package:get/instance_manager.dart';
 import 'get_x_switch_state.dart';
 import 'package:vibration/vibration.dart';
-// import 'package:shake/shake.dart';
+import 'package:shake/shake.dart';
 // import 'package:torch_light/torch_light.dart';
 
 class MainContent extends StatefulWidget {
@@ -18,7 +18,15 @@ class HomeContent extends State<MainContent> {
 	var switchStateBool = false;
 	var firstSwitch = 0;
 	var flashLightState = 0;
-	// late ShakeDetector detector;
+	late ShakeDetector detector;
+
+	@override
+	void initState() {
+		super.initState();
+		detector = ShakeDetector.waitForStart(onPhoneShake: () {
+			_vibrate();
+		});
+	}
   
 	@override
 	Widget build(BuildContext context) {
@@ -49,7 +57,9 @@ class HomeContent extends State<MainContent> {
 		// 		} else if(flashLightState == 0) {
 		// 			flashLightState = 1;
 		// 		}
-		// 		_switchFlashLight(flashLightState);
+		// 		_vibrate();
+
+		// 		// _switchFlashLight(flashLightState);
 		// 		// print("shake");
 		// 	}
 		// );
@@ -112,22 +122,23 @@ class HomeContent extends State<MainContent> {
 
 
 	// Check if app functionality is on or off.
-	Future<void> _checkSwitchState() async {
+	void _checkSwitchState() {
 		if(switchStateBool == true) {
 			if(firstSwitch == 1) {
-				if (await Vibration.hasVibrator() != null) {
-					Vibration.vibrate(duration: 100);
-				}
+				_vibrate();
 			}
-			// detector.startListening();
+			detector.startListening();
 			// print("ON");
 		} else if(switchStateBool == false && firstSwitch == 1) {
-			if (await Vibration.hasVibrator() != null) {
-				Vibration.vibrate(duration: 100);
-			}
-
-			// detector.stopListening();
+			_vibrate();
+			detector.stopListening();
 			// print("OFF");
+		}
+	}
+
+	Future<void> _vibrate() async {
+		if (await Vibration.hasVibrator() != null) {
+			Vibration.vibrate(duration: 200);
 		}
 	}
 
