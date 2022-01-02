@@ -27,11 +27,11 @@ class HomeContent extends State<MainContent> {
 			if(flashLightState == 1) {
 				flashLightState = 0;
 				_vibrate();
-				_disableTorch(context);
+				_disableFlashlight(context);
 			} else if(flashLightState == 0) {
 				flashLightState = 1;
 				_vibrate();
-				_enableTorch(context);
+				_enableFlashlight(context);
 			}
 		});
 	}
@@ -43,12 +43,13 @@ class HomeContent extends State<MainContent> {
 		}
 
 		return Scaffold(
+			backgroundColor: Color(0xE0ffffff),
 			appBar: AppBar(
 				backgroundColor: Colors.purple[900],
 				title: Text("Shakelight"),
 				actions: <Widget>[
 					IconButton(
-						onPressed: _optionsMenu, 
+						onPressed: _settingsMenu, 
 						icon: Icon(Icons.settings)
 					)
 				],
@@ -58,26 +59,6 @@ class HomeContent extends State<MainContent> {
 	}
 
 	Widget _homeContent() {
-		// detector = ShakeDetector.waitForStart(
-		// 	onPhoneShake: () {
-		// 		if(flashLightState == 1) {
-		// 			flashLightState = 0;
-		// 			_vibrate();
-		// 			_disableTorch(context);
-		// 		} else if(flashLightState == 0) {
-		// 			flashLightState = 1;
-		// 			_vibrate();
-		// 			_enableTorch(context);
-		// 		}
-				
-
-
-
-		// 		// _switchFlashLight(flashLightState);
-		// 		// print("shake");
-		// 	}
-		// );
-
 		_checkSwitchState();
 
 		return Center( 
@@ -94,7 +75,8 @@ class HomeContent extends State<MainContent> {
 						),
 					),
 
-					GetBuilder<GetXSwitchState>(builder: (_) => 
+					GetBuilder<GetXSwitchState>(
+						builder: (_) => 
 						Transform.scale(
 							scale: 2.0,
 							child: Switch (
@@ -115,11 +97,13 @@ class HomeContent extends State<MainContent> {
 		);
 	}
 
-	void _optionsMenu() {
+	// Settings menu
+	void _settingsMenu() {
 		Navigator.of(context).push(
 			MaterialPageRoute(
 				builder: (BuildContext context) {
 					return Scaffold(
+						backgroundColor: Color(0xE0ffffff),
 						appBar: AppBar(
 							backgroundColor: Colors.purple[900],
 							title: Text("Settings"),
@@ -133,8 +117,6 @@ class HomeContent extends State<MainContent> {
 		);
 	}
 
-
-
 	// Check if app functionality is on or off.
 	void _checkSwitchState() {
 		if(switchStateBool == true) {
@@ -142,69 +124,30 @@ class HomeContent extends State<MainContent> {
 				_vibrate();
 			}
 			detector.startListening();
-			// print("ON");
 		} else if(switchStateBool == false && firstSwitch == 1) {
 			_vibrate();
 			detector.stopListening();
-			// print("OFF");
 		}
 	}
 
+	// Vibrate the divice for 200ms.
 	Future<void> _vibrate() async {
 		if (await Vibration.hasVibrator() != null) {
 			Vibration.vibrate(duration: 200);
 		}
 	}
 
-	Future<bool> _checkFlashLight() async {
-		try {
-			return await TorchLight.isTorchAvailable();
-		} on Exception catch (_) {
-		// Handle error
-			return false;
-		}
-	}
-
-	// Future<void> _switchFlashLight(_onOff) async {
-	// 	if(_checkFlashLight() == true) {
-	// 		// print("available");
-
-	// 		switch(_onOff) {
-	// 			case 1:
-	// 				try {
-	// 					await TorchLight.enableTorch();
-	// 					} on Exception catch (_) {
-	// 					// Handle error
-	// 				}
-	// 			break;
-	// 			case 0:
-	// 				try {
-	// 					await TorchLight.disableTorch();
-	// 					} on Exception catch (_) {
-	// 					// Handle error
-	// 				}
-	// 			break;
-	// 		}
-
-	// 	} else {
-	// 		// print("not available");
-	// 	}
-	// }
-
-	Future<void> _enableTorch(BuildContext context) async {
+	// Enable flashlight
+	Future<void> _enableFlashlight(BuildContext context) async {
 		try {
 			await TorchLight.enableTorch();
-		} on Exception catch (_) {
-
-		}
+		} on Exception catch (_) {}
 	}
 
-	Future<void> _disableTorch(BuildContext context) async {
+	// Disable flashlight
+	Future<void> _disableFlashlight(BuildContext context) async {
 		try {
 			await TorchLight.disableTorch();
-		} on Exception catch (_) {
-
-		}
+		} on Exception catch (_) {}
 	}
 }
-
