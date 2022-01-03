@@ -1,4 +1,4 @@
-// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_collection_literals, prefer_const_literals_to_create_immutables, unrelated_type_equality_checks
+// ignore_for_file: prefer_const_constructors, use_key_in_widget_constructors, prefer_collection_literals, prefer_const_literals_to_create_immutables, unrelated_type_equality_checks, prefer_typing_uninitialized_variables
 
 import 'package:flutter/material.dart';
 import 'package:get/get_state_manager/get_state_manager.dart';
@@ -7,6 +7,8 @@ import 'get_x_switch_state.dart';
 import 'package:vibration/vibration.dart';
 import 'package:shake/shake.dart';
 import 'package:torch_light/torch_light.dart';
+import 'package:package_info_plus/package_info_plus.dart';
+import 'package:url_launcher/url_launcher.dart';
 
 class MainContent extends StatefulWidget {
 	@override
@@ -19,6 +21,11 @@ class HomeContent extends State<MainContent> {
 	var firstSwitch = 0;
 	var flashLightState = 0;
 	late ShakeDetector detector;
+
+	var appName = "";
+	var packageName = "";
+	var appVersion = "";
+	var buildNumber = "";
 
 	@override
 	void initState() {
@@ -34,6 +41,12 @@ class HomeContent extends State<MainContent> {
 				_enableFlashlight(context);
 			}
 		});
+		PackageInfo.fromPlatform().then((PackageInfo packageInfo) {
+			appName = packageInfo.appName.toString();
+			packageName = packageInfo.packageName.toString();
+			appVersion = packageInfo.version.toString();
+			buildNumber = packageInfo.buildNumber.toString();
+		});
 	}
   
 	@override
@@ -43,14 +56,14 @@ class HomeContent extends State<MainContent> {
 		}
 
 		return Scaffold(
-			backgroundColor: Color(0xE0ffffff),
+			backgroundColor: Colors.white,
 			appBar: AppBar(
 				backgroundColor: Colors.purple[900],
 				title: Text("Shakelight"),
 				actions: <Widget>[
 					IconButton(
 						onPressed: _settingsMenu, 
-						icon: Icon(Icons.settings)
+						icon: Icon(Icons.info_outline)
 					)
 				],
 			),
@@ -69,8 +82,8 @@ class HomeContent extends State<MainContent> {
 						margin: EdgeInsets.only(left:0, top:85,right:0,bottom:20.0),
 						child: Text("Turn shaking on/off",
 							style: TextStyle(
-							fontSize: 26,
-							fontWeight: FontWeight.bold
+								fontSize: 26,
+								fontWeight: FontWeight.bold
 							)
 						),
 					),
@@ -103,19 +116,79 @@ class HomeContent extends State<MainContent> {
 			MaterialPageRoute(
 				builder: (BuildContext context) {
 					return Scaffold(
-						backgroundColor: Color(0xE0ffffff),
+						backgroundColor: Colors.white,
 						appBar: AppBar(
 							backgroundColor: Colors.purple[900],
-							title: Text("Settings"),
+							title: Text("App info"),
 						),
-						// body: ListView(
-						// 	children: settingsList,
-						// ),
+						body: ListView(
+							children: <Widget>[
+								ListTile(
+									title: Text("Developer",
+										style: TextStyle(
+											fontWeight: FontWeight.bold,
+											fontSize: 16,
+										),
+									),
+									subtitle: Text("Gijsbert Morsing"),
+									onTap: () => _launchInBrowser("https://540503.student4a9.ao-ica.nl/"),
+									trailing: Icon(Icons.open_in_new),
+   						 		),
+								Divider(
+									thickness: 1,
+									indent: 15,
+            						endIndent: 15,
+								),
+								ListTile(
+									title: Text("App Github",
+										style: TextStyle(
+											fontWeight: FontWeight.bold,
+											fontSize: 16,
+										),
+									),
+									subtitle: Text("DragonStruck/Shakelight"),
+									onTap: () => _launchInBrowser("https://github.com/DragonStruck/Shakelight"),
+									trailing: Icon(Icons.open_in_new),
+   						 		),
+								Divider(
+									thickness: 1,
+									indent: 15,
+            						endIndent: 15,
+								),
+								ListTile(
+									title: Text("App version",
+										style: TextStyle(
+											fontWeight: FontWeight.bold,
+											fontSize: 16,
+										),
+									),
+									subtitle: Text(appVersion),
+									onTap: _emptyPress,
+   						 		),
+								Divider(
+									thickness: 1,
+									indent: 15,
+            						endIndent: 15,
+								),
+								ListTile(
+									title: Text("Build version",
+										style: TextStyle(
+											fontWeight: FontWeight.bold,
+											fontSize: 16,
+										),
+									),
+									subtitle: Text(buildNumber),
+									onTap: _emptyPress,
+   						 		),
+							],
+						),
 					);
 				}
 			)
 		);
 	}
+
+	_emptyPress() {}
 
 	// Check if app functionality is on or off.
 	void _checkSwitchState() {
@@ -149,5 +222,16 @@ class HomeContent extends State<MainContent> {
 		try {
 			await TorchLight.disableTorch();
 		} on Exception catch (_) {}
+	}
+
+	Future<void> _launchInBrowser(String url) async {
+		if (!await launch(
+			url,
+			forceSafariVC: false,
+			forceWebView: false,
+			headers: <String, String>{'my_header_key': 'my_header_value'},
+		)) {
+			throw 'Could not launch $url';
+		}
 	}
 }
